@@ -1,27 +1,33 @@
-const orderModel = require('../models/orderModel');
+const orderService = require('../services/orderService');
 
 exports.createOrder = (req, res) => {
   const orderData = req.body;
+
   if (!orderData.numeroPedido || !orderData.valorTotal || !orderData.dataCriacao || !Array.isArray(orderData.items)) {
-    return res.status(400).json({ error: 'Dados inválidos: campos obrigatórios ausentes' });
+    return res.status(400).json({ error: 'Invalid Data: Required fields missing' });
   }
-  orderModel.createOrder(orderData, (err, newOrder) => {
-    if (err) return res.status(500).json({ error: 'Erro ao criar pedido: ' + err.message });
+
+  orderService.createOrder(orderData, (err, newOrder) => {
+    if (err) return res.status(500).json({ error: 'Error creating order: ' + err.message });
+
     res.status(201).json(newOrder);
   });
 };
 
 exports.getOrder = (req, res) => {
   const { orderId } = req.params;
-  orderModel.getOrderById(orderId, (err, order) => {
-    if (err) return res.status(404).json({ error: 'Pedido não encontrado: ' + err.message });
+
+  orderService.getOrder(orderId, (err, order) => {
+    if (err) return res.status(404).json({ error: 'Order Not Found: ' + err.message });
+
     res.status(200).json(order);
   });
 };
 
 exports.listOrders = (req, res) => {
-  orderModel.listOrders((err, orders) => {
-    if (err) return res.status(500).json({ error: 'Erro ao listar pedidos: ' + err.message });
+  orderService.listOrders((err, orders) => {
+    if (err) return res.status(500).json({ error: 'Error listing orders: ' + err.message });
+
     res.status(200).json(orders);
   });
 };
@@ -29,19 +35,24 @@ exports.listOrders = (req, res) => {
 exports.updateOrder = (req, res) => {
   const { orderId } = req.params;
   const updateData = req.body;
+
   if (!updateData.valorTotal || !updateData.dataCriacao || !Array.isArray(updateData.items)) {
-    return res.status(400).json({ error: 'Dados inválidos para atualização' });
+    return res.status(400).json({ error: 'Invalid Data for Update' });
   }
-  orderModel.updateOrder(orderId, { ...updateData, numeroPedido: orderId }, (err, updated) => {
-    if (err) return res.status(500).json({ error: 'Erro ao atualizar pedido: ' + err.message });
+
+  orderService.updateOrder(orderId, updateData, (err, updated) => {
+    if (err) return res.status(500).json({ error: 'Error updating order: ' + err.message });
+
     res.status(200).json(updated);
   });
 };
 
 exports.deleteOrder = (req, res) => {
   const { orderId } = req.params;
-  orderModel.deleteOrder(orderId, (err) => {
-    if (err) return res.status(404).json({ error: 'Pedido não encontrado: ' + err.message });
+
+  orderService.deleteOrder(orderId, (err) => {
+    if (err) return res.status(404).json({ error: 'Order Not Found: ' + err.message });
+
     res.status(204).send();
   });
 };
